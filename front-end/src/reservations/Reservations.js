@@ -20,10 +20,10 @@ export default function Reservations() {
 
   const [formData, setFormData] = useState({ ...initialFormData });
 
-  const handleFormChange = (e) => {
+  const handleFormChange = (event) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [event.target.name]: event.target.value,
     });
   };
 
@@ -32,8 +32,8 @@ export default function Reservations() {
     isInTheFuture(date, errors);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     const controller = new AbortController();
     const errors = [];
     findErrors(formData.reservation_date, errors);

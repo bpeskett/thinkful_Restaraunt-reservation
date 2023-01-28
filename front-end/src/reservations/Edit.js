@@ -24,11 +24,10 @@ export default function Edit() {
     }
     loadReservation();
   }, [reservation_id]);
-
+//On this page is all of the functionality with Editing any of the information associated with our FORM, we pass in its initial state, using React's Hook useState and then following up with our onSubmit functionality and our handleFormChange and how we manipulate data in the DOM.
   const findErrors = (res, errors) => {
     isNotOnTuesday(res.reservation_date, errors);
     isInTheFuture(res.reservation_date, errors);
-    //in-line validation to ensure reservation can be modified
     if (res.status && res.status !== "booked") {
       errors.push(
         <li key="not booked">Reservation can no longer be changed</li>

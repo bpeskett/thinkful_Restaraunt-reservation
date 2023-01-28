@@ -5,8 +5,8 @@
 import formatReservationDate from "./format-reservation-date";
 import formatReservationTime from "./format-reservation-date";
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "https://bpeskett-restaraunt-back-end.onrender.com"
-  //process.env.REACT_APP_API_BASE_URL || "http://localhost:5001";
+const API_BASE_URL =
+  process.env.REACT_APP_API_BASE_URL || "https://bpeskett-restaraunt-back-end.onrender.com/";
 
 /**
  * Defines the default headers for these functions to work with `json-server`
@@ -68,7 +68,7 @@ export async function listReservations(params, signal) {
     .then(formatReservationTime);
 }
 
-//Creates new reservation
+//Creates a new reservation with our HTTP verbs
 export async function createReservation(reservation, signal) {
   const url = new URL(`${API_BASE_URL}/reservations`);
   const options = {
@@ -80,7 +80,7 @@ export async function createReservation(reservation, signal) {
   return await fetchJson(url, options, []);
 }
 
-//Creates new table
+//Creates a new table with out HTTP verb POST method
 export async function createTable(table, signal) {
   const url = new URL(`${API_BASE_URL}/tables`);
   const options = {
@@ -92,13 +92,13 @@ export async function createTable(table, signal) {
   return await fetchJson(url, options, []);
 }
 
-//Retrieves all tables
+//Retrieves all tables at the requested URL
 export async function listTables(signal) {
   const url = new URL(`${API_BASE_URL}/tables`);
   return await fetchJson(url, { headers, signal }, []);
 }
 
-//Seats a reservation at a table
+//Seats a reservation to a table with passed in parameters HTTP verb is then utilized and our .JSON syntax for resolving
 export async function seatReservation(table_id, reservation_id, signal) {
   const url = new URL(`${API_BASE_URL}/tables/${table_id}/seat`);
   const options = {
@@ -110,7 +110,7 @@ export async function seatReservation(table_id, reservation_id, signal) {
   return await fetchJson(url, options, []);
 }
 
-//Finishes a reservation that has been seated
+//Finishes a reservation that has been seated and stored previously
 export async function unassignTable(table_id, reservation_id, signal) {
   const url = new URL(`${API_BASE_URL}/tables/${table_id}/seat`);
   const options = {
@@ -122,7 +122,7 @@ export async function unassignTable(table_id, reservation_id, signal) {
   return await fetchJson(url, options, []);
 }
 
-//Cancels a reservation
+//Cancels the reservation
 export async function cancelReservation(reservation_id) {
   const url = new URL(`${API_BASE_URL}/reservations/${reservation_id}/status`);
   const options = {
@@ -133,7 +133,7 @@ export async function cancelReservation(reservation_id) {
   return await fetchJson(url, options, []);
 }
 
-//Finds reservation by id through a route parameter
+//Finds reservation by id through a route parameter then with async await resolves the promise object then calls our helper function
 export async function findReservation(reservation_id, signal) {
   const url = new URL(`${API_BASE_URL}/reservations/${reservation_id}`);
   return await fetchJson(url, { headers, signal }, [])
@@ -141,7 +141,7 @@ export async function findReservation(reservation_id, signal) {
     .then(formatReservationTime);
 }
 
-//Updates reservation info
+//Updates the new reservation information with passed in parameters and HTTP verbs
 export async function modifyReservation(id, res, signal) {
   const url = new URL(`${API_BASE_URL}/reservations/${id}`);
   const options = {
