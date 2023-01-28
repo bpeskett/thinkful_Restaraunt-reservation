@@ -1,8 +1,5 @@
 const knex = require("../db/connection");
 
-//one singular update file for our table_id and our reservation_id finding ALL similar items with both unique id's being compared
-
-
 function update(table_id, reservation_id) {
   return knex.transaction(async (transaction) => {
     await knex("reservations")
