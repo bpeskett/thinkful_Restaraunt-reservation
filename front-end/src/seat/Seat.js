@@ -12,27 +12,27 @@ export default function Seat() {
 
   useEffect(() => {
     async function loadTables() {
-      const abortCont = new AbortController();
+      const c = new AbortController();
       setError(null);
       try {
-        const response = await listTables(abortCont.signal);
+        const response = await listTables(c.signal);
         setTables((prev) => response);
       } catch (error) {
         setError(error);
       }
-      return () => abortCont.abort();
+      return () => c.abort();
     }
     loadTables();
   }, [reservation_id]);
 
-  async function handleSubmit(event) {
-    event.preventDefault();
-    const con = new AbortController();
+  async function handleSubmit(e) {
+    e.preventDefault();
+    const c = new AbortController();
     try {
       const response = await seatReservation(
         seatTable,
         reservation_id,
-        con.signal
+        c.signal
       );
       if (response) {
         history.push(`/dashboard`);
@@ -40,15 +40,15 @@ export default function Seat() {
     } catch (error) {
       setError(error);
     }
-    return () => con.abort();
+    return () => c.abort();
   }
 
   function handleCancel() {
     history.goBack();
   }
 
-  function handleSelectTable(event) {
-    setSeatTable(event.target.value);
+  function handleSelectTable(e) {
+    setSeatTable(e.target.value);
   }
 
   const options = tables.map((table) => (

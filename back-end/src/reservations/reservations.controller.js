@@ -1,7 +1,7 @@
 const asyncErrorBoundary = require("../errors/asyncErrorBoundary");
 const service = require("./reservations.service");
 
-const COMPLETED_RESERVATION_FIELDS = [
+const VALID_RESERVATION_FIELDS = [
   "first_name",
   "last_name",
   "mobile_number",
@@ -10,9 +10,9 @@ const COMPLETED_RESERVATION_FIELDS = [
   "people",
 ];
 
-//function for requiring certain time conditions are met before helper functionality is implemented, then follows CRUD operations
-function _validateTime(string) {
-  const [hour, minute] = string.split(":");
+//helper function for validation
+function _validateTime(str) {
+  const [hour, minute] = str.split(":");
 
   if (hour.length > 2 || minute.length > 2) {
     return false;
@@ -26,7 +26,7 @@ function _validateTime(string) {
   return true;
 }
 
-//requires the certain conditions are met before executing CRUD operations per; the exports below
+//validation middleware
 function isValidReservation(req, res, next) {
   const reservation = req.body.data;
 
@@ -34,25 +34,25 @@ function isValidReservation(req, res, next) {
     return next({ status: 400, message: `Must have data property.` });
   }
 
-  COMPLETED_RESERVATION_FIELDS.forEach((input) => {
-    if (!reservation[input]) {
-      return next({ status: 400, message: `${input} field required` });
+  VALID_RESERVATION_FIELDS.forEach((field) => {
+    if (!reservation[field]) {
+      return next({ status: 400, message: `${field} field required` });
     }
 
-    if (input === "people" && typeof reservation[input] !== "number") {
+    if (field === "people" && typeof reservation[field] !== "number") {
       return next({
         status: 400,
-        message: `${reservation[input]} is not a number type for people field.`,
+        message: `${reservation[field]} is not a number type for people field.`,
       });
     }
 
-    if (input === "reservation_date" && !Date.parse(reservation[input])) {
-      return next({ status: 400, message: `${input} is not a valid date.` });
+    if (field === "reservation_date" && !Date.parse(reservation[field])) {
+      return next({ status: 400, message: `${field} is not a valid date.` });
     }
 
-    if (input === "reservation_time") {
-      if (!_validateTime(reservation[input])) {
-        return next({ status: 400, message: `${input} is not a valid time` });
+    if (field === "reservation_time") {
+      if (!_validateTime(reservation[field])) {
+        return next({ status: 400, message: `${field} is not a valid time` });
       }
     }
   });
@@ -112,9 +112,9 @@ function hasBookedStatus(req, res, next) {
 }
 
 function isValidStatus(req, res, next) {
-  const VALID_STATII = ["booked", "seated", "finished", "cancelled"];
+  const VALID_STATUSES = ["booked", "seated", "finished", "cancelled"];
   const { status } = req.body.data;
-  if (!VALID_STATII.includes(status)) {
+  if (!VALID_STATUSES.includes(status)) {
     return next({ status: 400, message: "Status unknown." });
   }
   next();
@@ -145,14 +145,14 @@ const reservationExists = async (req, res, next) => {
   });
 };
 
-//Create, Read, Update, Delete functionality, making requests to the DB utilizing express's built in functionality req, res etc..
+//CRUD
 async function list(req, res) {
   const { date, mobile_number } = req.query;
   let reservations;
   if (mobile_number) {
     reservations = await service.search(mobile_number);
   } else {
-    reservations = date ? await service.listByDay(date) : await service.list();
+    reservations = date ? await service.listByDate(date) : await service.list();
   }
   res.json({
     data: reservations,
