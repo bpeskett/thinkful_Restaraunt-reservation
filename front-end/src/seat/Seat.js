@@ -1,32 +1,44 @@
-import React, { useState } from "react";
-import { useHistory } from "react-router";
-import { createTable } from "../utils/api";
+import React, { useState, useEffect } from "react";
+import { useParams, useHistory } from "react-router";
+import { listTables, seatReservation } from "../utils/api";
 import ErrorAlert from "../layout/ErrorAlert";
 
-export default function Tables() {
+export default function Seat() {
+  const { reservation_id } = useParams();
   const history = useHistory();
-  const initForm = { table_name: "", capacity: 0 };
-  const [tableError, setTableError] = useState(null);
-  const [tableForm, setTableForm] = useState({ ...initForm });
+  const [error, setError] = useState(null);
+  const [tables, setTables] = useState([]);
+  const [seatTable, setSeatTable] = useState(null);
 
-  function handleFormChange(e) {
-    setTableForm({
-      ...tableForm,
-      [e.target.name]: e.target.value,
-    });
-  }
+  useEffect(() => {
+    async function loadTables() {
+      const c = new AbortController();
+      setError(null);
+      try {
+        const response = await listTables(c.signal);
+        setTables((prev) => response);
+      } catch (error) {
+        setError(error);
+      }
+      return () => c.abort();
+    }
+    loadTables();
+  }, [reservation_id]);
 
   async function handleSubmit(e) {
     e.preventDefault();
     const c = new AbortController();
     try {
-      tableForm.capacity = Number(tableForm.capacity);
-      const response = await createTable(tableForm, c.signal);
+      const response = await seatReservation(
+        seatTable,
+        reservation_id,
+        c.signal
+      );
       if (response) {
-        history.push("/dashboard");
+        history.push(`/dashboard`);
       }
     } catch (error) {
-      setTableError(error);
+      setError(error);
     }
     return () => c.abort();
   }
@@ -35,47 +47,43 @@ export default function Tables() {
     history.goBack();
   }
 
+  function handleSelectTable(e) {
+    setSeatTable(e.target.value);
+  }
+
+  const options = tables.map((table) => (
+    <option
+      key={table.table_id}
+      value={table.table_id}
+    >{`${table.table_name} - ${table.capacity}`}</option>
+  ));
+
   return (
     <>
       <div className="d-flex justify-content-center pt-3">
-        <h3>Create a New Table</h3>
+        <h3>Select Table for Reservation</h3>
       </div>
-      <ErrorAlert error={tableError} />
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          name="table_name"
-          className="form-control mb-1"
-          id="table_name"
-          placeholder="Table"
-          value={tableForm.table_name}
-          onChange={handleFormChange}
-          minLength={2}
-          required
-        />
-        <input
-          type="number"
-          name="capacity"
-          className="form-control mb-1"
-          id="capacity"
-          placeholder="Number of guests"
-          value={tableForm.capacity}
-          onChange={handleFormChange}
-          min="1"
-          required
-        />
-        <div className="d-flex justify-content-center">
-          <button type="submit" className="btn btn-primary mr-1">
-            Submit
-          </button>
-          <button
-            type="button"
-            className="btn btn-secondary"
-            onClick={handleCancel}
+      <ErrorAlert error={error} />
+      <form onSubmit={handleSubmit} className="d-flex justify-content-center">
+        <label htmlFor="seat_reservation">
+          Seat at:
+          <select
+            id="table_id"
+            name="table_id"
+            onChange={handleSelectTable}
+            className="mr-1"
+            required
           >
-            Cancel
-          </button>
-        </div>
+            <option defaultValue>Select a table</option>
+            {options}
+          </select>
+        </label>
+        <button className="btn btn-primary mr-1" type="submit">
+          Submit
+        </button>
+        <button className="btn btn-secondary" onClick={handleCancel}>
+          Cancel
+        </button>
       </form>
     </>
   );
